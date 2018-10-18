@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <string.h>
 
 #include "wifi_convert_ini.h"
 
@@ -454,7 +455,7 @@ int wifi_ini_convert(void)
 	SYS_LOG_DBG("\n");
 #endif
 	FILE *fp;
-	if ((fp = fopen(OUTPUT_HEADER_FILE, "w")) == -1) {
+	if ((fp = fopen(OUTPUT_HEADER_FILE, "w")) == NULL) {
 		SYS_LOG_ERR("open file %s error\n", OUTPUT_HEADER_FILE);
 		return -1;
 	}
