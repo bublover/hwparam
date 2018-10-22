@@ -511,9 +511,6 @@ int wifi_ini_convert(void)
 
 	fprintf(fp, "%s", "\n};\n");
 
-	char *func_decl = "\n\nint wifi_rf_init(void);\n";
-	fprintf(fp, "%s", func_decl);
-	
 	char *post_header = "\n\n#endif /* __WIFI_RF_H__ */\n";
 	fprintf(fp, "%s", post_header);
 
