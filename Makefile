@@ -1,5 +1,7 @@
 TARGET := covert_ini
-OBJS := $(patsubst %.c,%.o,$(wildcard *.c))
+SRCS := $(wildcard ./src/*.c)
+INC := -I./inc
+OBJS := $(patsubst %.c,%.o,$(SRCS))
 
 
 all: $(TARGET)
@@ -7,6 +9,9 @@ all: $(TARGET)
 $(TARGET) : $(OBJS)
 	cc -o $(TARGET) $(OBJS)
 
+%.o : %.c
+	cc $(INC) -o $@ -c $<
+
 .PHONY : clean
 clean:
-	rm $(TARGET) $(OBJS)
+	rm -rf $(TARGET) $(OBJS)
