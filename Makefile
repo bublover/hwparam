@@ -1,4 +1,4 @@
-TARGET := covert_ini
+TARGET := convert_ini
 SRCS := $(wildcard ./src/*.c)
 INC := -I./inc
 OBJS := $(patsubst %.c,%.o,$(SRCS))
