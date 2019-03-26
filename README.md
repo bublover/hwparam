@@ -5,7 +5,7 @@ Convert Wi-Fi board configuration into a table, for Wi-Fi driver could take the 
 
 ## Usage
 1. make
-2. ./covert_ini
+2. ./convert_ini
 3. wifi_rf.h will be generated in the same path
 
 ## Note
