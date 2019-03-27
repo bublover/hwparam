@@ -1,4 +1,4 @@
-TARGET := convert_ini
+TARGET := hwparam
 SRCS := $(wildcard ./src/*.c)
 INC := -I./inc
 OBJS := $(patsubst %.c,%.o,$(SRCS))
