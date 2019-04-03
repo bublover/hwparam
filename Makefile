@@ -1,21 +1,15 @@
 TARGET := hwparam
 SRCS := $(wildcard ./src/*.c)
-INC := -I./inc
+CFLAGS := -I./inc
 OBJS := $(patsubst %.c,%.o,$(SRCS))
 
-
-all: $(TARGET)
-
-$(TARGET) : $(OBJS)
+$(TARGET): $(OBJS) wifi_board_config_$(BOARD).ini
 	@ (install -m 444 wifi_board_config_$(BOARD).ini wifi_board_config.ini && \
-	cc -o $(TARGET) $(OBJS) && \
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) && \
 	./$@ && \
-	install -m 444 wifi_rf.h $(PRJDIR)/$(KERNEL)/drivers/wifi/uwp/wifi_rf.h)
-	rm -rf $@
+	install -m 444 wifi_rf.h $(PRJDIR)/$(KERNEL)/drivers/wifi/uwp/wifi_rf.h && \
+	rm -rf wifi_board_config.ini)
 
-%.o : %.c
-	cc $(INC) -o $@ -c $<
-
-.PHONY : clean
+.PHONY: clean
 clean:
-	rm -rf $(TARGET) $(OBJS)
+	@ rm -rf $(TARGET) $(OBJS)
