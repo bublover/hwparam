@@ -1,12 +1,10 @@
-# wifi_convert_ini
+# hwparam
 
 ## Overview
 Convert Wi-Fi board configuration into a table, for Wi-Fi driver could take the table to configure Wi-Fi RF.
 
 ## Usage
-1. make
-2. ./hwparam
-3. wifi_rf.h will be generated in the same path
+It needs to be used with UNISOC/zephyr project where a main Makefile invokes hwparam's Makefile.
 
 ## Note
 This app is just providing a function to convert ini file. It's a pleasure to improve it.
