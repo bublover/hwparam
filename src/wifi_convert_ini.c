@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include "wifi_convert_ini.h"
 
