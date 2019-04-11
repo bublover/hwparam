@@ -53,4 +53,4 @@ dkms.conf
 
 # Output files
 wifi_rf.h
-covert_ini
+hwparam
