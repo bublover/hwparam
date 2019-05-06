@@ -1,15 +1,14 @@
-TARGET := hwparam
-SRCS := $(wildcard ./src/*.c)
-CFLAGS := -I./inc
-OBJS := $(patsubst %.c,%.o,$(SRCS))
+TARGET	:= hwparam
+SRCS	:= $(wildcard ./src/*.c)
+OBJS	:= $(patsubst %.c,%.o,$(SRCS))
+BOARD	?= 96b_ivy5661
+DEFS	?= BINARY_OUTPUT
+CFLAGS	:= -I./inc -D$(DEFS)
 
 .PHONY: $(TARGET)
 $(TARGET): $(OBJS) wifi_board_config_$(BOARD).ini
-	@ (install -m 444 wifi_board_config_$(BOARD).ini wifi_board_config.ini && \
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS) && \
-	./$@ && \
-	install -m 444 wifi_rf.h $(PRJDIR)/$(KERNEL)/drivers/wifi/uwp/rf_$(BOARD).h && \
-	rm -rf wifi_board_config.ini)
+	@ ($(CC) $(CFLAGS) -o $(TARGET) $(OBJS))
+	@ (./$@ -f wifi_board_config_$(BOARD).ini)
 
 .PHONY: clean
 clean:

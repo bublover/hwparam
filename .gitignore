@@ -54,3 +54,4 @@ dkms.conf
 # Output files
 wifi_rf.h
 hwparam
+hwparam.bin

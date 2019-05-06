@@ -13,17 +13,23 @@
 
 #include "wifi_convert_ini.h"
 
-#define SYS_LOG_ERR(format, ...) printf(format,  ##__VA_ARGS__)
-#define SYS_LOG_DBG(format, ...) printf(format,  ##__VA_ARGS__)
+#define SYS_LOG_ERR(format, ...) printf("[ERR]"format"\n",  ##__VA_ARGS__)
+#define SYS_LOG_DBG(format, ...)
 
 #define SYSTEM_WIFI_CONFIG_FILE "wifi_board_config.ini"
-#define OUTPUT_HEADER_FILE "wifi_rf.h"
+#ifdef BINARY_OUTPUT
+#define OUTPUT_FILE "hwparam.bin"
+#else
+#define OUTPUT_FILE "wifi_rf.h"
+#endif
 
 #define CF_TAB(NAME, MEM_OFFSET, TYPE) \
 	{ NAME, (size_t)(&(((struct wifi_conf_t *)(0))->MEM_OFFSET)), TYPE }
 
 #define SEC1 (1)
 #define SEC2 (2)
+
+#define VERSION	"v1.0.0"
 
 static u8_t sec1_table[1024] = {
 };
@@ -418,7 +424,7 @@ static int wifi_nvm_parse(const char *path, void *p_data)
 	return 0;
 }
 
-int wifi_ini_convert(void)
+static int wifi_ini_convert(char *file)
 {
 	int ret = 0;
 	struct wifi_conf_t conf;
@@ -427,7 +433,7 @@ int wifi_ini_convert(void)
 
 	memset(&conf, 0, sizeof(struct wifi_conf_t));
 
-	ret = wifi_nvm_parse(SYSTEM_WIFI_CONFIG_FILE, (void *)&conf);
+	ret = wifi_nvm_parse(file, (void *)&conf);
 	if (ret) {
 		return ret;
 	}
@@ -441,27 +447,22 @@ int wifi_ini_convert(void)
 	int sec2_len = sizeof(struct wifi_conf_sec2_t);
 	int total_len = sec1_len + sec2_len;
 
-
 	int i;
-#if 0
-	for (i = 0; i < sec1_len; i++) {
-		SYS_LOG_DBG("%d ", sec1_table[i]);
-	}
-
-	SYS_LOG_DBG("\n");
-
-	for (i = 0; i < sec2_len; i++) {
-		SYS_LOG_DBG("%d ", sec2_table[i]);
-	}
-
-	SYS_LOG_DBG("\n");
-#endif
 	FILE *fp;
-	if ((fp = fopen(OUTPUT_HEADER_FILE, "w")) == NULL) {
-		SYS_LOG_ERR("open file %s error\n", OUTPUT_HEADER_FILE);
+
+#ifdef BINARY_OUTPUT
+	if ((fp = fopen(OUTPUT_FILE, "wb")) == NULL) {
+#else
+	if ((fp = fopen(OUTPUT_FILE, "w")) == NULL) {
+#endif
+		SYS_LOG_ERR("open file %s error\n", OUTPUT_FILE);
 		return -1;
 	}
 
+#ifdef BINARY_OUTPUT
+	fwrite(sec1_table, sec1_len, 1, fp);
+	fwrite(sec2_table, sec2_len, 1, fp);
+#else
 	char *license = "/*\n * Copyright (c) 2018, UNISOC Incorporated\n *\n * SPDX-License-Identifier: Apache-2.0\n */\n\n";
 	fprintf(fp, "%s", license);
 
@@ -474,7 +475,7 @@ int wifi_ini_convert(void)
 	char *sec1_pre = "const u8_t sec1_table[] = {\n";
 	int len = 1;
 	fprintf(fp, "%s", sec1_pre);
-	
+
 	for (i = 0; i < sec1_len; i++) {
 		fprintf(fp, "0x%.2x", sec1_table[i]);
 
@@ -515,18 +516,54 @@ int wifi_ini_convert(void)
 
 	char *post_header = "\n\n#endif /* __WIFI_RF_H__ */\n";
 	fprintf(fp, "%s", post_header);
+#endif
 
+	SYS_LOG_DBG("sec1_len: %d\n", sec1_len);
+	SYS_LOG_DBG("sec2_len: %d\n", sec2_len);
+	SYS_LOG_DBG("Convert wifi ini success.\n");
 
-
-	SYS_LOG_DBG("\nConvert wifi ini success.\n");
-
+	fflush(fp);
 	fclose(fp);
-
 
 	return 0;
 }
 
-int main(void) {
-	wifi_ini_convert();
+
+void help()
+{
+	printf("\n\tVersion: %s\n\n"
+			"\tIf any concerned, please contact WCN CD WIFI HOST team.\n\n"
+			"\tUsage:\n"
+			"\t./hwparam [-f wifi_board_config.ini]\n"
+			"\t[] is optional.\n\n", VERSION);
+
+	exit(0);
+}
+
+int main(int argc, char **argv)
+{
+	int opt;
+	char *file = NULL;
+
+	while ((opt = getopt (argc, argv, "f:h")) != -1) {
+		switch (opt) {
+			case 'h':
+				help();
+				break;
+			case 'f':
+				file = optarg;
+				break;
+			default:
+				help();
+				break;
+		}
+	}
+
+	if (!file) {
+		wifi_ini_convert(SYSTEM_WIFI_CONFIG_FILE);
+	} else {
+		wifi_ini_convert(file);
+	}
+
 	return 0;
 }

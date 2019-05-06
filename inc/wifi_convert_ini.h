@@ -187,6 +187,4 @@ struct wifi_conf_t {
 	struct coex_config_t coex_config;
 };
 
-/* int get_wifi_config_param(struct wifi_conf_t *p); */
-int wifi_ini_convert(void);
 #endif /* __WIFI_CONVERT_INI_H__ */
