@@ -4,9 +4,6 @@
  *
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -396,21 +393,23 @@ static unsigned char buffer[7 * 1024];
 static int wifi_nvm_parse(const char *path, void *p_data)
 {
 	unsigned int read_len, buffer_len;
-	int fp;
+	FILE *fp;
 	unsigned char *p_buf = buffer;
-	unsigned int file_size = 0;
+	unsigned int file_size, curpos = 0;
 
-	if ((fp = open(path, O_RDONLY)) == -1) {
+	if ((fp = fopen(path, "r")) == NULL) {
 		SYS_LOG_ERR("open file %s error", path);
 		return -1;
 	}
 
-	file_size = lseek(fp, 0, SEEK_END);
-	lseek(fp, 0, SEEK_SET);
+	curpos = ftell(fp);
+	fseek(fp, 0L, SEEK_END);
+	file_size = ftell(fp);
+	fseek(fp, curpos, SEEK_SET);
 	buffer_len = 0;
 
 	do {
-		read_len = read(fp, p_buf, file_size);
+		read_len = fread(p_buf, 1, file_size, fp);
 		if (read_len > 0) {
 			buffer_len += read_len * sizeof(char);
 			file_size -= read_len;
@@ -418,7 +417,7 @@ static int wifi_nvm_parse(const char *path, void *p_data)
 		}
 	} while ((read_len > 0) && (file_size > 0));
 
-	close(fp);
+	fclose(fp);
 
 	wifi_nvm_buf_operate(buffer, buffer_len, p_data);
 	return 0;
@@ -532,7 +531,7 @@ static int wifi_ini_convert(char *file)
 void help()
 {
 	printf("\n\tVersion: %s\n\n"
-			"\tIf any concerned, please contact WCN CD WIFI HOST team.\n\n"
+			"\tIf anything concerned, please contact WCN CD WIFI HOST team.\n\n"
 			"\tUsage:\n"
 			"\t./hwparam [-f wifi_board_config.ini]\n"
 			"\t[] is optional.\n\n", VERSION);
